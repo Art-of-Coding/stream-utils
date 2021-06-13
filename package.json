@@ -1,0 +1,26 @@
+{
+  "name": "@art-of-coding/stream-utils",
+  "version": "0.0.1",
+  "description": "Redis Stream utilities for node.js",
+  "main": "./dist/index.js",
+  "author": "Michiel van der Velde <michiel@michielvdvelde.nl>",
+  "homepage": "http://github.com/Art-of-Coding/stream-utils",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Art-of-Coding/stream-utils.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "ioredis": "^4.27.6"
+  },
+  "devDependencies": {
+    "@types/ioredis": "^4.26.4",
+    "@types/node": "^15.12.2"
+  }
+}
