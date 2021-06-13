@@ -65,7 +65,6 @@ export default class StreamsReader {
       // Remove stream if this was the last listener
       if (this.#streamListenerCount.get(key) === 0) {
         this.#streams.delete(key)
-        this.#streamEmitter.removeAllListeners(key)
         this.#streamListenerCount.delete(key)
       }
     }

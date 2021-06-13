@@ -56,12 +56,13 @@ export default class ConnectionPool {
       }
 
       this.#connections.delete(connection)
+      return
+    }
+
+    if (connection.status === 'ready') {
+      this.#connections.set(connection, false)
     } else {
-      if (connection.status === 'ready') {
-        this.#connections.set(connection, false)
-      } else {
-        this.#connections.delete(connection)
-      }
+      this.#connections.delete(connection)
     }
   }
 }
