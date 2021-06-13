@@ -3,6 +3,11 @@ export {
 } from './lib/ConnectionPool'
 
 export {
+  default as StreamsReader,
+  StreamsReaderOptions,
+} from './lib/StreamsReader'
+
+export {
   xrange,
   xrevrange,
   xread

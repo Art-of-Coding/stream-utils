@@ -36,6 +36,27 @@ const [poolConnection, release] = pool.get();
 release();
 ```
 
+## Streams Reader
+
+```typescript
+import IORedis from "ioredis";
+import { StreamsReader } from "@art-of-coding/stream-utils";
+
+const blockingConnection = new IORedis();
+const reader = new StreamsReader(blockingConnection, {
+  count: 5,
+  blockingTimeout: 5000,
+});
+
+const ac = new AbortController();
+
+for await (
+  const [entry, id] of reader.read("stream-key", { id: "$", signal: ac.signal })
+) {
+  // do something with the entry...
+}
+```
+
 ### xrange
 
 The `xrange` command as an async iterator.

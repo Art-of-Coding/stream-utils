@@ -9,3 +9,17 @@ export function array2object(arr: any[]) {
 
   return obj
 }
+
+// extracted/copied from xxscreeps
+// https://github.com/laverdet/xxscreeps/blob/main/src/utility/async.ts#L105
+export class Deferred<Type = void> {
+  promise: Promise<Type>;
+  resolve!: (payload: Type) => void;
+  reject!: (error: Error) => void;
+  constructor() {
+    this.promise = new Promise<Type>((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
+}
