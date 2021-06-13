@@ -58,25 +58,30 @@ export default class StreamsReader {
 
     this.#streamEmitter.on(key, listener)
 
+    const cleanup = () => {
+      this.#streamEmitter.removeListener(key, listener)
+      this.#streamListenerCount.set(key, this.#streamListenerCount.get(key)! - 1)
+
+      // Remove stream if this was the last listener
+      if (this.#streamListenerCount.get(key) === 0) {
+        this.#streams.delete(key)
+        this.#streamEmitter.removeAllListeners(key)
+        this.#streamListenerCount.delete(key)
+      }
+    }
+
     while (run) {
       try {
         yield await deferred.promise
       } catch (e) {
         if (e.message !== 'aborted') {
+          cleanup()
           throw e
         }
       }
     }
 
-    this.#streamEmitter.removeListener(key, listener)
-    this.#streamListenerCount.set(key, this.#streamListenerCount.get(key)! - 1)
-
-    // Remove stream if this was the last listener
-    if (this.#streamListenerCount.get(key) === 0) {
-      this.#streams.delete(key)
-      this.#streamEmitter.removeAllListeners(key)
-      this.#streamListenerCount.delete(key)
-    }
+    cleanup()
   }
 
   async #read(): Promise<void> {
