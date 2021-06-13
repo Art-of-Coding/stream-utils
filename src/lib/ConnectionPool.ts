@@ -16,7 +16,7 @@ export default class ConnectionPool {
 
     this.#maxSize = maxSize
 
-    while (size) {
+    while (size > 0) {
       const conn = this.#connection.duplicate()
       conn.once('close', () => this.#release(conn))
       this.#connections.set(conn, false)
