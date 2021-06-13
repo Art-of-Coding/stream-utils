@@ -30,7 +30,9 @@ import { ConnectionPool } from "@art-of-coding/stream-utils";
 const connection = new IORedis();
 const pool = new ConnectionPool({ connection });
 
-const [poolConnection, release] = pool.get();
+// somewhere else...
+
+const [connection, release] = pool.get();
 // do something with the connection...
 // and release it back into the pool
 release();
@@ -38,11 +40,16 @@ release();
 
 ### Streams Reader
 
-This little piece of code may become the successor successor to
+This little piece of code may become the successor to
 [redis-streams-manager](https://github.com/MichielvdVelde/redis-streams-manager)
 and my favorite way to work with streams.
 
-The core of the reader is `xread` as an async iterator.
+The core of the reader is `xread` as an async iterator. The reader manages
+multiple streams automatically, starting and stopping consumption as required.
+You can use the same reader to consume multiple streams simultaneously.
+
+The reader makes use of the blocking version of `xread`, so it requires a
+dedicated Redis connection.
 
 ```typescript
 import IORedis from "ioredis";
@@ -50,8 +57,8 @@ import { StreamsReader } from "@art-of-coding/stream-utils";
 
 const blockingConnection = new IORedis();
 const reader = new StreamsReader(blockingConnection, {
-  count: 5,
-  blockingTimeout: 5000,
+  count: 5, // defaults to max 5 entries per stream per xread command
+  blockingTimeout: 5000, // defaults to 5000 ms
 });
 
 const ac = new AbortController();
@@ -65,7 +72,7 @@ for await (
 
 ### xrange
 
-The `xrange` command as an async iterator.
+The [`xrange`](https://redis.io/commands/xrange) command as an async iterator.
 
 ```typescript
 import IORedis from "ioredis";
@@ -80,7 +87,8 @@ for await (const [entry, id] of xrange(connection, "key")) {
 
 ### xrevrange
 
-The `xrevrange` command as an async iterator.
+The [`xrevrange`](https://redis.io/commands/xrevrange) command as an async
+iterator.
 
 ```typescript
 import IORedis from "ioredis";
@@ -95,7 +103,7 @@ for await (const [entry, id] of xrevrange(connection, "key")) {
 
 ### xread
 
-The `xread` command as an async iterator.
+The [`xread`](https://redis.io/commands/xread) command as an async iterator.
 
 ```typescript
 import IORedis from "ioredis";
