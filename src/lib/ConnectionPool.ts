@@ -17,7 +17,9 @@ export default class ConnectionPool {
     this.#maxSize = maxSize
 
     while (size) {
-      this.#connections.set(this.#connection.duplicate(), false)
+      const conn = this.#connection.duplicate()
+      conn.once('close', () => this.#release(conn))
+      this.#connections.set(conn, false)
       size--
     }
   }
@@ -35,6 +37,7 @@ export default class ConnectionPool {
     }
 
     const connection = this.#connection.duplicate()
+    connection.once('close', () => this.#release(connection))
     this.#connections.set(connection, true)
 
     return [connection, () => this.#release(connection)]
@@ -48,10 +51,17 @@ export default class ConnectionPool {
 
   #release(connection: Redis) {
     if (this.#connections.size > this.#maxSize) {
-      connection.disconnect()
+      if (connection.status === 'ready') {
+        connection.disconnect()
+      }
+
       this.#connections.delete(connection)
     } else {
-      this.#connections.set(connection, false)
+      if (connection.status === 'ready') {
+        this.#connections.set(connection, false)
+      } else {
+        this.#connections.delete(connection)
+      }
     }
   }
 }
