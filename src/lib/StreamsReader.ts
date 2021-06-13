@@ -116,7 +116,7 @@ export default class StreamsReader {
             const props = array2object(entry[1])
             this.#streamEmitter.emit(key, id, props)
             lastId = id
-            await wait(100)
+            await wait(50)
           }
 
           this.#streams.set(key, lastId)
