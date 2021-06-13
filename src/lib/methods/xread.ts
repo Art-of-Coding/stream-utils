@@ -13,7 +13,6 @@ export default async function* xread(blockingConnection: Redis, key: string, { i
   if (signal) {
     signal.addEventListener('abort', () => {
       run = false
-      blockingConnection.disconnect()
     }, { once: true })
   }
 
@@ -34,4 +33,6 @@ export default async function* xread(blockingConnection: Redis, key: string, { i
       yield [obj, entry[0]]
     }
   }
+
+  blockingConnection.disconnect()
 }
