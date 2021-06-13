@@ -45,10 +45,6 @@ export default class StreamsReader {
       this.#streams.set(key, id)
     }
 
-    if (!this.#reading) {
-      this.#read().catch(err => console.error(err))
-    }
-
     this.#streamListenerCount.set(key, (this.#streamListenerCount.get(key) ?? 0) + 1)
 
     const listener = (id: string, props: T) => {
@@ -57,6 +53,10 @@ export default class StreamsReader {
     }
 
     this.#streamEmitter.on(key, listener)
+
+    if (!this.#reading) {
+      this.#read().catch(err => console.error(err))
+    }
 
     const cleanup = () => {
       this.#streamEmitter.removeListener(key, listener)
