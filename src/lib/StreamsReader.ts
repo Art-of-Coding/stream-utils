@@ -87,33 +87,42 @@ export default class StreamsReader {
       const keys = [...this.#streams.keys()]
       const ids = [...this.#streams.values()]
 
-      const results = await this.#connection.xread(
-        'COUNT', this.#opts.count,
-        'BLOCK', this.#opts.blockingTimeout,
-        'STREAMS', ...keys, ...ids,
-      )
+      try {
+        const results = await this.#connection.xread(
+          'COUNT', this.#opts.count,
+          'BLOCK', this.#opts.blockingTimeout,
+          'STREAMS', ...keys, ...ids,
+        )
 
-      for (const stream of results) {
-        const key = stream[0]
-        const entries = stream[1]
+        for (const stream of results) {
+          const key = stream[0]
+          const entries = stream[1]
 
-        let lastId = this.#streams.get(key)
+          let lastId = this.#streams.get(key)
 
-        if (!lastId) {
-          // the stream has been removed
-          // don't emit the remaining entries
-          continue
+          if (!lastId) {
+            // the stream has been removed
+            // don't emit the remaining entries
+            continue
+          }
+
+          for (const entry of entries) {
+            const id = entry[0]
+            const props = array2object(entry[1])
+            this.#streamEmitter.emit(key, id, props)
+            lastId = id
+            await wait(100)
+          }
+
+          this.#streams.set(key, lastId)
+        }
+      } catch (e) {
+        if (e.message !== 'Connection is closed.') {
+          this.#reading = false
+          throw e
         }
 
-        for (const entry of entries) {
-          const id = entry[0]
-          const props = array2object(entry[1])
-          this.#streamEmitter.emit(key, id, props)
-          lastId = id
-          await wait(100)
-        }
-
-        this.#streams.set(key, lastId)
+        await wait(this.#opts.blockingTimeout)
       }
     }
 
