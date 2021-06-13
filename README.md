@@ -36,7 +36,13 @@ const [poolConnection, release] = pool.get();
 release();
 ```
 
-## Streams Reader
+### Streams Reader
+
+This little piece of code may become the successor successor to
+[redis-streams-manager](https://github.com/MichielvdVelde/redis-streams-manager)
+and my favorite way to work with streams.
+
+The core of the reader is `xread` as an async iterator.
 
 ```typescript
 import IORedis from "ioredis";
