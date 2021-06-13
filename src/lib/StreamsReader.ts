@@ -1,6 +1,6 @@
 import { EventEmitter } from 'stream'
 import { Redis } from 'ioredis'
-import { array2object, Deferred, wait } from './util'
+import { array2object, Deferred, immediate, wait } from './util'
 
 export interface StreamsReaderOptions {
   count?: number,
@@ -116,7 +116,7 @@ export default class StreamsReader {
             const props = array2object(entry[1])
             this.#streamEmitter.emit(key, id, props)
             lastId = id
-            await wait(50)
+            await immediate()
           }
 
           this.#streams.set(key, lastId)
