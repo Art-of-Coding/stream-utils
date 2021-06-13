@@ -29,6 +29,7 @@ export default class StreamsReader {
     signal?: AbortSignal,
   } = {}): AsyncIterableIterator<[T, string]> {
     let run = true
+    let deferred = new Deferred<[T, string]>()
 
     if (signal) {
       signal.addEventListener('abort', () => {
@@ -50,8 +51,6 @@ export default class StreamsReader {
 
     this.#streamListenerCount.set(key, (this.#streamListenerCount.get(key) ?? 0) + 1)
 
-    let deferred = new Deferred<[T, string]>()
-
     const listener = (id: string, props: T) => {
       deferred.resolve([props, id])
       deferred = new Deferred()
@@ -70,7 +69,7 @@ export default class StreamsReader {
     }
 
     this.#streamEmitter.removeListener(key, listener)
-    this.#streamListenerCount.set(key, (this.#streamListenerCount.get(key) ?? 1) - 1)
+    this.#streamListenerCount.set(key, this.#streamListenerCount.get(key)! - 1)
 
     // Remove stream if this was the last listener
     if (this.#streamListenerCount.get(key) === 0) {
