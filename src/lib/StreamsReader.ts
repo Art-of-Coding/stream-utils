@@ -1,4 +1,4 @@
-import { EventEmitter } from 'stream'
+import { EventEmitter } from 'events'
 import { Redis } from 'ioredis'
 import { array2object, Deferred, immediate, wait } from './util'
 
