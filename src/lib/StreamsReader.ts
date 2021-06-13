@@ -31,7 +31,13 @@ export default class StreamsReader {
     let run = true
 
     if (signal) {
-      signal.addEventListener('abort', () => run = false, { once: true })
+      signal.addEventListener('abort', () => {
+        run = false
+
+        if (deferred) {
+          deferred.reject(new Error('aborted'))
+        }
+      }, { once: true })
     }
 
     if (!this.#streams.has(key)) {
@@ -54,7 +60,13 @@ export default class StreamsReader {
     this.#streamEmitter.on(key, listener)
 
     while (run) {
-      yield await deferred.promise
+      try {
+        yield await deferred.promise
+      } catch (e) {
+        if (e.message !== 'aborted') {
+          throw e
+        }
+      }
     }
 
     this.#streamEmitter.removeListener(key, listener)
