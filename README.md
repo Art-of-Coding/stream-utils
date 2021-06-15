@@ -122,6 +122,28 @@ for await (
 }
 ```
 
+### xadd
+
+Simpler way to use `xadd`.
+
+See the source code to find out which options are supported.
+
+```typescript
+import IORedis from "ioredis";
+import { xadd } from "@art-of-coding/stream-utils";
+
+const connection = new IORedis();
+
+const value = {
+  some: "value",
+};
+
+const id = await xadd(connection, "key", value, {
+  maxLength: 10000, // optional
+  maxLengthType: "~",
+});
+```
+
 ## License
 
 Copyright 2021 [Michiel van der Velde](https://michielvdvelde.nl).
