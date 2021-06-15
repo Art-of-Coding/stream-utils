@@ -102,23 +102,26 @@ export default class StreamsReader {
           const key = stream[0]
           const entries = stream[1]
 
-          let lastId = this.#streams.get(key)
+          if (!entries.length) {
+            continue
+          }
 
-          if (!lastId) {
+          if (!this.#streams.has(key)) {
             // the stream has been removed
             // don't emit the remaining entries
             continue
           }
 
+          let lastId: string
+
           for (const entry of entries) {
-            const id = entry[0]
+            const id = lastId = entry[0]
             const props = array2object(entry[1])
             this.#streamEmitter.emit(key, id, props)
-            lastId = id
             await immediate()
           }
 
-          this.#streams.set(key, lastId)
+          this.#streams.set(key, lastId!)
         }
       } catch (e) {
         if (e.message !== 'Connection is closed.') {
