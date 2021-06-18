@@ -43,12 +43,6 @@ export default class ConnectionPool {
     return [connection, () => this.#release(connection)]
   }
 
-  public releaseAll(): void {
-    for (const connection of this.#connections.keys()) {
-      this.#release(connection)
-    }
-  }
-
   #release(connection: Redis) {
     if (this.#connections.size > this.#maxSize) {
       if (connection.status === 'ready') {
