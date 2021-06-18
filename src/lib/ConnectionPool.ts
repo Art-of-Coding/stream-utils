@@ -1,4 +1,5 @@
 import IORedis, { Redis, RedisOptions } from 'ioredis'
+import { isRedis } from './util'
 
 export default class ConnectionPool {
   #connection: Redis
@@ -10,17 +11,14 @@ export default class ConnectionPool {
     size?: number,
     maxSize?: number,
   }) {
-    this.#connection = typeof (connection as Redis).set === 'function'
-      ? connection as Redis
-      : new IORedis(connection as RedisOptions)
+    this.#connection = isRedis(connection)
+      ? connection
+      : new IORedis(connection)
 
     this.#maxSize = maxSize
 
-    while (size > 0) {
-      const conn = this.#connection.duplicate()
-      conn.once('close', () => this.#release(conn))
-      this.#connections.set(conn, false)
-      size--
+    for (let i = 0; i < size; i++) {
+      this.#create(false)
     }
   }
 
@@ -30,17 +28,21 @@ export default class ConnectionPool {
 
   public get(): [Redis, () => void] {
     for (const [connection, busy] of this.#connections) {
-      if (!busy) {
-        this.#connections.set(connection, true)
-        return [connection, () => this.#release(connection)]
-      }
+      if (busy) continue
+
+      this.#connections.set(connection, true)
+      return [connection, () => this.#release(connection)]
     }
 
+    const connection = this.#create(true)
+    return [connection, () => this.#release(connection)]
+  }
+
+  #create(busy: boolean): Redis {
     const connection = this.#connection.duplicate()
     connection.once('close', () => this.#release(connection))
-    this.#connections.set(connection, true)
-
-    return [connection, () => this.#release(connection)]
+    this.#connections.set(connection, busy)
+    return connection
   }
 
   #release(connection: Redis) {

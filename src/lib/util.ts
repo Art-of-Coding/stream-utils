@@ -1,3 +1,9 @@
+import type { Redis } from 'ioredis'
+
+export function isRedis(obj: any): obj is Redis {
+  return typeof obj.set === 'function'
+}
+
 export async function wait(ms: number): Promise<void> {
   return new Promise<void>(resolve => setTimeout(resolve, ms))
 }
