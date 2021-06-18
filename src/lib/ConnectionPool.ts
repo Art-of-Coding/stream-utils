@@ -26,12 +26,16 @@ export default class ConnectionPool {
     return this.#connections.size
   }
 
-  public get(): [Redis, () => void] {
+  public get(force = true): [Redis, () => void] {
     for (const [connection, busy] of this.#connections) {
       if (busy) continue
 
       this.#connections.set(connection, true)
       return [connection, () => this.#release(connection)]
+    }
+
+    if (!force && this.#connections.size >= this.#maxSize) {
+      throw new Error('Maximum amount of concurrent connections reached')
     }
 
     const connection = this.#create(true)
