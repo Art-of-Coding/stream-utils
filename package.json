@@ -1,6 +1,6 @@
 {
   "name": "@art-of-coding/stream-utils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Redis Stream utilities for node.js",
   "main": "./dist/index.js",
   "author": "Michiel van der Velde <michiel@michielvdvelde.nl>",
